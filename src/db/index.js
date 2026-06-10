@@ -8,11 +8,28 @@ const {
   optionDetailTableSchema,
 } = require("./optionSections");
 
-const DB_HOST = process.env.DB_HOST || "127.0.0.1";
-const DB_PORT = Number(process.env.DB_PORT || 4000);
-const DB_USER = process.env.DB_USER || "root";
-const DB_PASSWORD = process.env.DB_PASSWORD || "";
-const DB_NAME = process.env.DB_NAME || "landingpage";
+function parseDatabaseUrl() {
+  if (!process.env.DATABASE_URL) return {};
+  try {
+    const url = new URL(process.env.DATABASE_URL);
+    return {
+      host: url.hostname,
+      port: url.port,
+      user: decodeURIComponent(url.username || ""),
+      password: decodeURIComponent(url.password || ""),
+      database: decodeURIComponent(url.pathname.replace(/^\//, "") || ""),
+    };
+  } catch (err) {
+    return {};
+  }
+}
+
+const databaseUrl = parseDatabaseUrl();
+const DB_HOST = process.env.DB_HOST || process.env.MYSQLHOST || process.env.MYSQL_HOST || databaseUrl.host || "127.0.0.1";
+const DB_PORT = Number(process.env.DB_PORT || process.env.MYSQLPORT || process.env.MYSQL_PORT || databaseUrl.port || 4000);
+const DB_USER = process.env.DB_USER || process.env.MYSQLUSER || process.env.MYSQL_USER || databaseUrl.user || "root";
+const DB_PASSWORD = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || databaseUrl.password || "";
+const DB_NAME = process.env.DB_NAME || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || databaseUrl.database || "landingpage";
 const DB_POOL_SIZE = Number(process.env.DB_POOL_SIZE || 5);
 const DB_SSL = String(process.env.DB_SSL || "true").toLowerCase() !== "false";
 const CUSTOMER_SUBMISSIONS_TABLE = "customer_submissions";
