@@ -25,6 +25,13 @@ function parseDatabaseUrl() {
 }
 
 const databaseUrl = parseDatabaseUrl();
+const hasExplicitDbHost = Boolean(process.env.DB_HOST || process.env.MYSQLHOST || process.env.MYSQL_HOST || databaseUrl.host);
+if (process.env.NODE_ENV === "production" && !hasExplicitDbHost) {
+  throw new Error(
+    "Missing database configuration. Set DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME or DATABASE_URL in Railway Variables."
+  );
+}
+
 const DB_HOST = process.env.DB_HOST || process.env.MYSQLHOST || process.env.MYSQL_HOST || databaseUrl.host || "127.0.0.1";
 const DB_PORT = Number(process.env.DB_PORT || process.env.MYSQLPORT || process.env.MYSQL_PORT || databaseUrl.port || 4000);
 const DB_USER = process.env.DB_USER || process.env.MYSQLUSER || process.env.MYSQL_USER || databaseUrl.user || "root";
